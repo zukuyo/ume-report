@@ -76,9 +76,11 @@ table.g tr.gs td{border-top:1px solid #c7c7cc}
 .empty{padding:60px 0;text-align:center;color:var(--sub)}
 /* 対応する人・返信の下書き（2026-11-13） */
 .claim{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 0;padding:10px 12px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:14px}
-.claim .who{color:var(--sub);margin-right:2px}
+.claim .who{color:var(--sub);flex-basis:100%}
+/* ボタンは3つを1行に同じ幅で並べる（1つだけ折り返さないように。2026-11-13 天田さん） */
+.claim .btns{display:flex;gap:8px;flex-basis:100%}
 .claim b{font-weight:700}
-.claim button{font:inherit;font-size:14px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer}
+.claim button{flex:1 1 0;min-width:0;white-space:nowrap;font:inherit;font-size:14px;font-weight:600;padding:7px 6px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer}
 .claim button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 details.draft summary{cursor:pointer;list-style:none;color:var(--accent);font-weight:600;font-size:15px;padding:2px 0}
 details.draft summary::-webkit-details-marker{display:none}
@@ -211,7 +213,7 @@ function render(){
   // 対応する人（押すとグループに1行知らせる。二重の返信・返し忘れを防ぐ）
   var ow=DATA.owner;
   h+='<div class="claim" id="claim"><span class="who">'+(ow?'<b>'+esc(ow.who)+'さん</b>が対応中（'+esc(ow.at)+'）':'まだ誰も対応していません')+'</span>'+
-    ['梅木','畑山','天田'].map(function(w){return '<button data-who="'+w+'"'+(ow&&ow.who===w?' class="on"':'')+'>'+w+(ow&&ow.who===w?'さん対応中':'が対応')+'</button>';}).join('')+'</div>';
+    '<div class="btns">'+['梅木','畑山','天田'].map(function(w){return '<button data-who="'+w+'"'+(ow&&ow.who===w?' class="on"':'')+'>'+w+(ow&&ow.who===w?'さん対応中':'が対応')+'</button>';}).join('')+'</div></div>';
   if(!done)h+=(DATA.ageMin!=null&&DATA.ageMin>=10)
     ?'<div class="status">下調べは作れませんでした（時間がかかっています）。問い合わせ内容はこのまま見られます。少したってから開き直すと、できていれば表示されます</div>'
     :'<div class="status"><span class="dot"></span>会社・会場・日程の空きを調べています。できしだい、ここに出ます（2〜5分）</div>';
