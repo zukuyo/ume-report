@@ -135,6 +135,8 @@ var IC = {
   tel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>',
   mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>',
   map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  // スプレッドシートのアイコン（緑の紙に白いマス。2026-11-14 天田さん）
+  sheet:'<svg viewBox="0 0 24 24"><path d="M14.5 1.5H6A2 2 0 0 0 4 3.5v17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" fill="#0f9d58"/><path d="M14.5 1.5V7H20z" fill="#87ceac"/><path d="M7.5 10.5h9v8h-9z" fill="#fff"/><path d="M7.5 13.2h9M7.5 15.8h9M11 10.5v8" stroke="#0f9d58" stroke-width="1"/></svg>',
   web:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>'
 };
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -217,7 +219,7 @@ function grid(g){
   var md=(g.days[1]&&g.days[1].ymd||'').replace(/-/g,'').slice(0,6);
   var su='https://docs.google.com/spreadsheets/d/165lmqNS5fA-z8PxxLwwQfxn7BROop0DPfRKcajtiqMo/edit'+(md?'#gid='+md:'');
   h+='</tbody></table></div><p class="legend">スケジュール帳（RAHU_schedule）の前日・当日・翌日。開くたびに今の内容を読み直します。天田さんの行は出していません。横にスクロールできます</p>'+
-    '<div class="actions"><a class="btn" href="'+su+'" target="_blank" rel="noopener">'+IC.web+'スケジュール帳を開く</a></div>';
+    '<div class="actions"><a class="btn" href="'+su+'" target="_blank" rel="noopener">'+IC.sheet+'スケジュール帳を開く</a></div>';
   return h;
 }
 
