@@ -172,7 +172,11 @@ function grid(g){
     });
     h+='</tr>';
   });
-  h+='</tbody></table></div><p class="legend">スケジュール帳（RAHU_schedule）の前日・当日・翌日。開くたびに今の内容を読み直します。天田さんの行は出していません。横にスクロールできます</p>';
+  // スケジュール帳へのリンク（当日の月のタブへ。タブのIDは「202611」のように年月。違っても先頭のタブが開くだけ。2026-11-13 天田さん）
+  var md=(g.days[1]&&g.days[1].ymd||'').replace(/-/g,'').slice(0,6);
+  var su='https://docs.google.com/spreadsheets/d/165lmqNS5fA-z8PxxLwwQfxn7BROop0DPfRKcajtiqMo/edit'+(md?'#gid='+md:'');
+  h+='</tbody></table></div><p class="legend">スケジュール帳（RAHU_schedule）の前日・当日・翌日。開くたびに今の内容を読み直します。天田さんの行は出していません。横にスクロールできます</p>'+
+    '<div class="actions"><a class="btn" href="'+su+'" target="_blank" rel="noopener">'+IC.web+'スケジュール帳を開く</a></div>';
   return h;
 }
 
