@@ -66,12 +66,11 @@ table.g th.day.mid{background:#ff9f0a;color:#1d1d1f;box-shadow:inset 0 3px 0 #c9
 table.g td.dm{box-shadow:inset 0 0 0 9999px rgba(255,159,10,.08)}
 table.g th.h{font-weight:500;color:#8e8e93;text-align:center}
 table.g td.dstart,table.g th.dstart{border-left:2px solid #8e8e93}
-table.g .st{position:sticky;left:0;z-index:2;background:#fafafa;min-width:64px;max-width:64px;font-weight:700;white-space:normal;line-height:1.25;font-size:10px;vertical-align:top;padding-top:4px}
-table.g .st2{position:sticky;left:64px;z-index:2;background:#fafafa;min-width:70px;max-width:70px;color:#6e6e73;border-right:1px solid #c7c7cc}
+table.g .st{position:sticky;left:0;z-index:2;background:#fafafa;font-weight:700;white-space:normal;line-height:1.1;font-size:10px;vertical-align:middle;text-align:center;padding:2px 0;overflow:hidden}
+table.g .st2{position:sticky;z-index:2;background:#fafafa;color:#6e6e73;border-right:1px solid #c7c7cc;font-size:9px;overflow:hidden;white-space:nowrap;padding:0 2px}
 table.g th.st,table.g th.st2{z-index:3;background:#f2f2f7}
 .nar table.g td,.nar table.g th{padding:0 1px;font-size:9px}
 .nar table.g th.h{font-size:8px;letter-spacing:-.04em}
-.nar table.g .st{min-width:56px;max-width:56px;font-size:9px;border-right:1px solid #c7c7cc}
 .nar table.g th.day{padding-left:4px}
 table.g td{overflow:visible;text-overflow:clip}
 table.g td .ov{position:relative;z-index:1;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:24px}
@@ -163,6 +162,15 @@ function card(title,inner,cls){if(!inner)return '';n++;return '<section class="c
 function fallbackCopy(t){var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(a);}
 function mapUrl(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
 
+// A列の名前（スケジュール帳は縦書きで、名前は大きく白、説明は小さく薄い。字のまとまりごとに大きさと色を合わせる。2026-11-14）
+function pt(s){return Math.max(7,Math.round((s||10)*1.25));}
+function groupHtml(r){
+  if(!r.runs||!r.runs.length)return esc(r.group).replace(/\n/g,'<br>');
+  return r.runs.map(function(x){return '<span style="font-size:'+pt(x.s)+'px;font-weight:'+(x.b?700:400)+(x.fc?';color:'+x.fc:'')+'">'+esc(x.t).replace(/\n/g,'<br>')+'</span>';}).join('');
+}
+// 左上の見出し（スケジュール帳の1・2行目と同じ。1行目はA・B列をつなげて濃い色、2行目はメモ）
+function headL(g,lw,mw){var H=g.hdr||{};return '<th class="st" colspan="'+(mw?2:1)+'" style="width:'+(lw+mw)+'px;font-size:8px;line-height:1.15;'+colorStyle(H.bg1,H.fc1)+'">'+esc(H.t1||'リソース').replace(/\n/g,'<br>')+'</th>';}
+function headL2(g,lw,mw){var H=g.hdr||{};return '<th class="st" style="width:'+lw+'px;'+colorStyle(H.bgA,H.fcA)+'">'+esc(H.tA||'')+'</th>'+(mw?'<th class="st2" style="left:'+lw+'px;text-align:center;'+colorStyle(H.bgB,H.fcB)+'">'+esc(H.tB||'メモ')+'</th>':'');}
 // 本物のシートの色（白・黒は既定の見た目のまま）
 function colorStyle(bg,fc){var st=[];if(bg&&bg!=='#ffffff')st.push('background:'+bg);if(fc&&fc!=='#000000')st.push('color:'+fc);return st.join(';');}
 function grid(g){
@@ -171,23 +179,23 @@ function grid(g){
   if(!g.rows||!g.rows.length)return '<p class="none">スケジュール帳に、この日のタブが見つかりませんでした</p>';
   // 列幅は固定（長い文字で列が広がらないように。スプレッドシートと同じく、はみ出た文字は帯の中で切る）
   // スマホ（幅600px未満）は、1日分が1画面に収まるよう列を細くし、メモ列を省く
-  var nar=window.innerWidth<600,cw=nar?13:24,lw=nar?56:64,mw=nar?0:70;
+  var nar=window.innerWidth<600,cw=nar?13:24,F=g.fmt||{},lw=F.wA?Math.max(22,F.wA):64,mw=F.wB?Math.max(30,F.wB):(nar?0:70);
   GW={cw:cw,lw:lw+mw,day:g.hours.length*cw,nar:nar};
   var nc=g.days.length*g.hours.length,cols='<colgroup><col style="width:'+lw+'px">'+(mw?'<col style="width:'+mw+'px">':'');
   for(var i=0;i<nc;i++)cols+='<col style="width:'+cw+'px">';
   cols+='</colgroup>';
-  var h='<div class="gridbox'+(nar?' nar':'')+'" id="gb"><table class="g" style="table-layout:fixed;width:'+(lw+mw+nc*cw)+'px">'+cols+'<thead><tr><th class="st" rowspan="2" style="width:'+lw+'px;'+(g.hdr?colorStyle(g.hdr.bgA,g.hdr.fcA):'')+'">リソース</th>'+(mw?'<th class="st2" rowspan="2" style="'+(g.hdr?colorStyle(g.hdr.bgB,g.hdr.fcB):'')+'">メモ</th>':'');
+  var h='<div class="gridbox'+(nar?' nar':'')+'" id="gb"><table class="g" style="table-layout:fixed;width:'+(lw+mw+nc*cw)+'px">'+cols+'<thead><tr>'+headL(g,lw,mw);
   g.days.forEach(function(d,i){h+='<th class="day'+(i===1?' mid':'')+'" colspan="'+g.hours.length+'"'+(i===1?' id="mid"':'')+'>'+(i===1?'開催日　':'')+esc(d.label)+(d.found?'':'（タブなし）')+'</th>';});
-  h+='</tr><tr>';
+  h+='</tr><tr>'+headL2(g,lw,mw);
   g.days.forEach(function(){g.hours.forEach(function(x,k){h+='<th class="h'+(k===0?' dstart':'')+'">'+esc(x)+'</th>';});});
   h+='</tr></thead><tbody>';
   // まとまり（A列）は縦にまとめて1回だけ出す
   var spans={},last=null,first=null;
-  g.rows.forEach(function(r,i){if(r.group!==last){first=i;spans[i]=1;last=r.group;}else spans[first]++;});
+  g.rows.forEach(function(r,i){if(r.gs||r.group!==last||first===null){first=i;spans[i]=1;last=r.group;}else spans[first]++;});
   g.rows.forEach(function(r,i){
     h+='<tr'+(spans[i]?' class="gs"':'')+'>';
-    if(spans[i])h+='<td class="st" rowspan="'+spans[i]+'" style="'+colorStyle(r.bgA,r.fcA)+'">'+esc(r.group).replace(/\n/g,'<br>')+'</td>';
-    if(mw)h+='<td class="st2" style="'+colorStyle(r.bgB,r.fcB)+'">'+esc(r.label)+'</td>';
+    if(spans[i])h+='<td class="st" rowspan="'+spans[i]+'" style="'+colorStyle(r.bgA,r.runs?'':r.fcA)+'">'+groupHtml(r)+'</td>';
+    if(mw)h+='<td class="st2" style="left:'+lw+'px;'+colorStyle(r.bgB,r.fcB)+(r.fB&&r.fB.h==='right'?';text-align:right':'')+'">'+esc(r.label)+'</td>';
     // 3日分を1列に並べる（タブが無い日は空マス）
     var all=[],H=g.hours.length;
     r.days.forEach(function(cells){for(var k=0;k<H;k++)all.push(cells&&cells[k]?cells[k]:{t:'',bg:'',fc:'',w:0,m:0,c:0});});
