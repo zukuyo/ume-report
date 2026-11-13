@@ -76,8 +76,9 @@ table.g tr.gs td{border-top:1px solid #c7c7cc}
 /* 起動の見せ方（2026-11-13 天田さん「ロゴはさりげなく。待たされている感じにしない」）
    小さなロゴ（見出しの上に残る）・上の細い線・中身の形をした灰色の枠（スケルトン）で、開いた直後から動いて見せる。中身が届いたら即切り替え */
 .brand{height:34px;margin:0 0 10px -4px}
-.brand video,.brand img{height:34px;width:auto;display:block;mix-blend-mode:screen}
-@media (prefers-color-scheme: light){.brand video,.brand img{filter:invert(1);mix-blend-mode:multiply}}
+/* 動画の黒は真っ黒でないので、明るさを寄せてから背景に溶かす（暗い画面は黒を消し、明るい画面は白黒反転して白を消す） */
+.brand video,.brand img{height:34px;width:auto;display:block;filter:brightness(.85) contrast(1.4);mix-blend-mode:screen}
+@media (prefers-color-scheme: light){.brand video,.brand img{filter:invert(1) brightness(1.15) contrast(1.4);mix-blend-mode:multiply}}
 #bar{position:fixed;left:0;top:0;height:2px;width:0;background:var(--accent);z-index:60;transition:width 1.4s cubic-bezier(.1,.7,.3,1),opacity .3s ease .25s}
 #bar.go{width:72%}
 #bar.done{width:100%;opacity:0;transition:width .25s ease,opacity .3s ease .2s}
