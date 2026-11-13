@@ -62,7 +62,9 @@ table.g td,table.g th{border-right:1px solid #e3e3e8;border-bottom:1px solid #e3
   padding:0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
 table.g th{background:#f2f2f7;font-weight:700;color:#3a3a3c;position:sticky;top:0}
 table.g th.day{font-size:11px;height:26px;text-align:left;padding-left:6px;border-left:2px solid #8e8e93}
-table.g th.day.mid{background:#ff9f0a;color:#1d1d1f;box-shadow:inset 0 3px 0 #c93400}
+/* 開催日：色はスケジュール帳のまま、上にオレンジの線と「開催日」の札（2026-11-14） */
+table.g th.day.mid{box-shadow:inset 0 4px 0 #ff9f0a}
+.kd{display:inline-block;background:#ff9f0a;color:#1d1d1f;font-size:10px;font-weight:700;border-radius:4px;padding:0 5px;margin-right:6px;line-height:16px}
 table.g td.dm{box-shadow:inset 0 0 0 9999px rgba(255,159,10,.08)}
 table.g th.h{font-weight:500;color:#8e8e93;text-align:center}
 table.g td.dstart,table.g th.dstart{border-left:2px solid #8e8e93}
@@ -72,6 +74,7 @@ table.g th.st,table.g th.st2{z-index:3;background:#f2f2f7}
 .nar table.g td,.nar table.g th{padding:0 1px;font-size:9px}
 .nar table.g th.h{font-size:8px;letter-spacing:-.04em}
 .nar table.g th.day{padding-left:4px}
+.nar .kd{font-size:9px;padding:0 3px;margin-right:4px}
 table.g td{overflow:visible;text-overflow:clip}
 table.g td .ov{position:relative;z-index:1;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:24px}
 table.g td.c .ov{opacity:.55}
@@ -187,9 +190,12 @@ function grid(g){
   for(var i=0;i<nc;i++)cols+='<col style="width:'+cw+'px">';
   cols+='</colgroup>';
   var h='<div class="gridbox'+(nar?' nar':'')+'" id="gb"><table class="g" style="table-layout:fixed;width:'+(lw+mw+nc*cw)+'px">'+cols+'<thead><tr>'+headL(g,lw,mw);
-  g.days.forEach(function(d,i){h+='<th class="day'+(i===1?' mid':'')+'" colspan="'+g.hours.length+'"'+(i===1?' id="mid"':'')+'>'+(i===1?'開催日　':'')+esc(d.label)+(d.found?'':'（タブなし）')+'</th>';});
+  // 日付の行：スケジュール帳の1行目と同じ色・太さ・寄せ方（平日は紺、土曜は青、日曜・祝日は赤。祝日は見出しに名前が入っている）
+  g.days.forEach(function(d,i){var hd=d.hd||{},st=colorStyle(hd.bg,hd.fc)+(hd.h==='center'?';text-align:center;padding-left:0':'')+(hd.b===0?';font-weight:500':'');
+    h+='<th class="day'+(i===1?' mid':'')+'" colspan="'+g.hours.length+'"'+(i===1?' id="mid"':'')+' style="'+st+'">'+(i===1?'<span class="kd">開催日</span>':'')+esc(d.label)+(d.found?'':'（タブなし）')+'</th>';});
   h+='</tr><tr>'+headL2(g,lw,mw);
-  g.days.forEach(function(){g.hours.forEach(function(x,k){h+='<th class="h'+(k===0?' dstart':'')+'">'+esc(x)+'</th>';});});
+  // 時刻の行：スケジュール帳の2行目と同じ（0・6・12・18時だけ濃い太字）
+  g.days.forEach(function(d){g.hours.forEach(function(x,k){var q=d.hrs&&d.hrs[k],st=q?colorStyle(q.bg,q.fc)+(q.b?';font-weight:700':''):'';h+='<th class="h'+(k===0?' dstart':'')+'" style="'+st+'">'+esc(x)+'</th>';});});
   h+='</tr></thead><tbody>';
   // まとまり（A列）は縦にまとめて1回だけ出す
   var spans={},last=null,first=null;
