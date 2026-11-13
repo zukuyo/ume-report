@@ -191,13 +191,14 @@ function render(){
       (q?'<div class="actions"><a class="btn" href="'+mapUrl(q)+'" target="_blank" rel="noopener">'+IC.map+'Googleマップで開く</a></div>':''));
   }
   // 日程と空き
-  if(r.dateNote||(r.schedule&&r.schedule.length)||DATA.grid){
+  if(r.dateNote||(r.schedule&&r.schedule.length)||DATA.grid||DATA.gridDate){
     var s=(r.dateNote?'<p class="lead">'+rich(r.dateNote)+'</p>':'');
     if(r.schedule&&r.schedule.length){
       s+='<table class="sched">'+r.schedule.map(function(x){var t=String(x.text||'');return '<tr><td class="who">'+esc(x.who)+'</td><td'+(/^記載なし/.test(t)?' class="none"':'')+'>'+rich(t)+'</td></tr>';}).join('')+'</table>';
     }
     if(r.scheduleExtra)s+='<p class="meta" style="margin:8px 0 0">'+rich(r.scheduleExtra)+'</p>';
-    s+=grid(DATA.grid);
+    // 表は後から差し込む（中身を先に見せるため。2026-11-13）
+    s+='<div id="gridslot">'+(DATA.grid?grid(DATA.grid):(DATA.gridDate?'<p class="legend">スケジュール帳の前日・当日・翌日を読み込んでいます…</p>':''))+'</div>';
     h+=card('日程と空き',s);
   }
   if(r.past&&r.past.length)h+=card('過去の取引',list(r.past));
@@ -207,10 +208,25 @@ function render(){
   app.innerHTML=h;
   var m=document.getElementById('more');
   if(m)m.onclick=function(){document.getElementById('fb').textContent=body;m.remove();};
-  // 3日分の表は、当日の列が見えるところまで横に送る
-  var gb=document.getElementById('gb'),mid=document.getElementById('mid');
-  // 当日の頭が、左の見出しのすぐ右に来るまで送る（PCは前日の夕方も少し見せる）
+  scrollGrid();
+  if(DATA.gridDate&&!DATA.grid)loadGrid();
+}
+// 3日分の表は、当日の頭が左の見出しのすぐ右に来るまで横に送る（PCは前日の夕方も少し見せる）
+function scrollGrid(){
+  var gb=document.getElementById('gb');
   if(gb&&GW){var go=function(){gb.scrollLeft=Math.max(0,GW.day-(GW.nar?0:GW.cw*6));};go();setTimeout(go,60);}
+}
+var gridLoading=false;
+function loadGrid(){
+  if(gridLoading)return;gridLoading=true;
+  fetch(API+'?rg='+encodeURIComponent(TOKEN),{credentials:'omit'}).then(function(r){return r.json();}).then(function(x){
+    DATA.grid=(x&&x.grid)||{error:'表がありません'};
+    var slot=document.getElementById('gridslot');
+    if(slot){slot.innerHTML=grid(DATA.grid);scrollGrid();}
+  }).catch(function(){
+    var slot=document.getElementById('gridslot');
+    if(slot)slot.innerHTML='<p class="legend">スケジュール帳を読み込めませんでした。開き直すと、もう一度読み込みます</p>';
+  }).then(function(){gridLoading=false;});
 }
 document.getElementById('app').innerHTML='<div class="status"><span class="dot"></span>読み込んでいます</div>';
 load(function(d,bad){
