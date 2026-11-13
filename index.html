@@ -38,6 +38,11 @@ ul.list li{padding:9px 0;border-top:1px solid var(--line);font-size:15px}
 ul.list li:first-child{border-top:0;padding-top:2px}
 .guess{color:var(--sub)}
 .tag{display:inline-block;font-size:11px;font-weight:700;color:var(--sub);background:var(--soft);border-radius:6px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+/* 出どころの札：原文（問い合わせに書いてある）・AI（ウェブで調べた）・推測（2026-11-13 天田さん） */
+.tag.src{color:#1d1d1f;background:#e8e8ed}
+.tag.ai{color:#0057b8;background:#e3effd}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.src{color:#f5f5f7;background:#3a3a3c}:root:not([data-theme="light"]) .tag.ai{color:#8ec5ff;background:#0b2a4a}}
+.siteurl{font-size:13px;color:var(--sub);word-break:break-all;margin-top:6px}
 .body{white-space:pre-wrap;font-size:15px}
 .more{color:var(--accent);background:none;border:0;padding:6px 0 0;font-size:14px;font-weight:600;cursor:pointer}
 a{color:var(--accent)}
@@ -134,9 +139,13 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 // 文字の中のURLをリンクにする。「推測：」は薄く
 function rich(s){
   s=String(s==null?'':s);
-  var g=/^推測[：:]/.test(s);
-  var h=esc(s).replace(/https?:\/\/[^\s<>"']+/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>';});
-  if(g)h='<span class="tag">推測</span><span class="guess">'+h.replace(/^推測[：:]\s*/,'')+'</span>';
+  var m=s.match(/^(推測|原文|AI)[：:]\s*/);
+  var h=esc(m?s.slice(m[0].length):s).replace(/https?:\/\/[^\s<>"']+/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>';});
+  if(m){
+    if(m[1]==='推測')h='<span class="tag">推測</span><span class="guess">'+h+'</span>';
+    else if(m[1]==='原文')h='<span class="tag src">原文</span>'+h;
+    else h='<span class="tag ai">AI調べ</span>'+h;
+  }
   return h;
 }
 function list(a){
@@ -230,7 +239,10 @@ function render(){
   // 会社
   var co=r.company||null;
   if(co&&(co.name||co.lines&&co.lines.length)){
-    h+=card('会社',(co.name?'<p class="lead">'+esc(co.name)+'</p>':'')+list(co.lines)+(co.url?'<div class="actions"><a class="btn" href="'+esc(co.url)+'" target="_blank" rel="noopener">'+IC.web+'公式サイト</a></div>':''));
+    // 同じ会社だと確信がないときは、名前の下に目印を出す
+    var mt=String(co.match||''),unsure=/^確信なし/.test(mt);
+    h+=card('会社',(co.name?'<p class="lead">'+esc(co.name)+'</p>':'')+(unsure?'<div class="badge" style="margin:0 0 8px">同じ会社か確信がありません'+(mt.replace(/^確信なし[：:]?\s*/,'')?'：'+esc(mt.replace(/^確信なし[：:]?\s*/,'')):'')+'</div>':'')+list(co.lines)+
+      (co.url?'<div class="actions"><a class="btn" href="'+esc(co.url)+'" target="_blank" rel="noopener">'+IC.web+'公式サイト</a></div><div class="siteurl">'+esc(co.url)+'</div>':''));
   }
   // 会場
   var v=r.venue||null;
@@ -264,6 +276,7 @@ function render(){
     }
     h+=card('最初の返信の提案',list(r.reply)+dr);
   }
+  h+='<p class="legend" style="margin-top:18px">札の見方：<span class="tag src">原文</span>問い合わせに書いてあること　<span class="tag ai">AI調べ</span>AIがウェブで調べたこと　<span class="tag">推測</span>推し量り</p>';
   h+='<div class="foot">UMEコンシェルズ　·　更新 '+esc(DATA.updated||'')+'<br>このページはURLを知っている人だけが開けます。外に共有しないでください</div>';
   app.innerHTML=h;
   Array.prototype.forEach.call(document.querySelectorAll('.copy'),function(b){b.onclick=function(){
