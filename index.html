@@ -79,6 +79,10 @@ table.g tr.gs td{border-top:1px solid #c7c7cc}
 /* 動画の黒は真っ黒でないので、明るさを寄せてから背景に溶かす（暗い画面は黒を消し、明るい画面は白黒反転して白を消す） */
 .brand video,.brand img{height:60px;width:auto;display:block;filter:brightness(.85) contrast(1.4);mix-blend-mode:screen}
 @media (prefers-color-scheme: light){.brand video,.brand img{filter:invert(1) brightness(1.15) contrast(1.4);mix-blend-mode:multiply}}
+/* 読み込み中はロゴを画面のど真ん中（縦も横も）に大きめに出し、中身が届いたら見出しの位置へすっと上がる（2026-11-13 天田さん） */
+.brand>*{position:relative;z-index:40;transform-origin:50% 50%}
+body.lift .brand>*{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion: reduce){body.lift .brand>*{transition:none}}
 #bar{position:fixed;left:0;top:0;height:2px;width:0;background:var(--accent);z-index:60;transition:width 1.4s cubic-bezier(.1,.7,.3,1),opacity .3s ease .25s}
 #bar.go{width:72%}
 #bar.done{width:100%;opacity:0;transition:width .25s ease,opacity .3s ease .2s}
@@ -253,20 +257,36 @@ function skeleton(){
     '<div style="display:flex;gap:8px;margin-bottom:4px">'+L('128px',36,'0').replace('border-radius:8px','')+L('84px',36,'0')+'</div>'+
     c(['92%','70%'])+c(['96%','88%','64%','80%'])+c(['50%','76%'])+c(['58%','84%']);
 }
-document.getElementById('app').innerHTML=skeleton();
+// 読み込み中は、真ん中のロゴと上の細い線だけ（灰色の枠は出さない）。ロゴは見出しの位置に置いたまま、画面のど真ん中まで寄せて大きく見せる
+document.body.className='loading';
+function centerLogo(){
+  var el=document.querySelector('.brand>*'),slot=document.querySelector('.brand');
+  if(!el||document.body.className!=='loading')return;
+  var r=slot.getBoundingClientRect(),dy=window.innerHeight/2-(r.top+r.height/2);
+  el.style.transform='translateY('+dy+'px) scale(1.5)';
+}
+centerLogo();window.addEventListener('resize',centerLogo);
+// 中身が届いたら、ロゴを真ん中から見出しの位置へすっと上げる
+function liftLogo(){
+  var b=document.body;if(b.className!=='loading')return;
+  var el=document.querySelector('.brand>*');
+  b.className='lift';
+  if(el)requestAnimationFrame(function(){requestAnimationFrame(function(){el.style.transform='none';});});
+  setTimeout(function(){b.className='';},560);
+}
 var bar=document.getElementById('bar');
 requestAnimationFrame(function(){requestAnimationFrame(function(){bar.className='go';});});
 function barDone(){bar.className='go done';}
 // 小さなロゴ：流れなければ（省電力モードなど）最後のコマの静止画にする。途中で中身が届いても止めない
 (function(){
   var v=document.getElementById('sv');if(!v)return;
-  var still=function(){if(!v.parentNode)return;var i=document.createElement('img');i.src='logo.png';i.alt='';v.parentNode.replaceChild(i,v);};
+  var still=function(){if(!v.parentNode)return;var i=document.createElement('img');i.src='logo.png';i.alt='';v.parentNode.replaceChild(i,v);i.style.transform=v.style.transform;};
   v.addEventListener('error',still);
   var p=v.play&&v.play();if(p&&p.catch)p.catch(still);
   setTimeout(function(){if(v.paused&&v.currentTime===0)still();},1200);
 })();
 load(function(d,bad){
-  barDone();
+  barDone();liftLogo();
   if(!d&&!bad){document.getElementById('app').innerHTML='<div class="empty">読み込めませんでした。<br>電波のよいところで、もう一度開いてください。</div>';return;}
   DATA=d;
   if(DATA&&DATA.form)document.title='UMEコンシェルズの下調べ｜'+(DATA.form.name||DATA.id);
