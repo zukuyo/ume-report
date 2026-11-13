@@ -237,7 +237,7 @@ function render(){
   var body=String(f.body||'').trim();
   if(body){
     var long=body.length>420;
-    h+=card('問い合わせ内容','<div class="body" id="fb">'+esc(long?body.slice(0,400)+'…':body)+'</div>'+(long?'<button class="more" id="more">続きを読む</button>':''));
+    h+=card('問い合わせ内容（原文）','<div class="body" id="fb">'+esc(long?body.slice(0,400)+'…':body)+'</div>'+(long?'<button class="more" id="more">続きを読む</button>':''));
   }
   // 会社
   var co=r.company||null;
