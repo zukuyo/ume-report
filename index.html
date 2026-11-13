@@ -73,9 +73,14 @@ table.g tr.gs td{border-top:1px solid #c7c7cc}
 .legend{font-size:12px;color:var(--sub);margin-top:8px}
 .foot{margin-top:24px;font-size:12px;color:var(--sub);text-align:center}
 .empty{padding:60px 0;text-align:center;color:var(--sub)}
+/* 起動アニメ（SoundWichのロゴ。2026-11-13 天田さん「このGIFでやって」。軽いMP4で流す） */
+#splash{position:fixed;inset:0;z-index:50;background:#000;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease}
+#splash.out{opacity:0;pointer-events:none}
+#splash video{width:min(78vw,420px);height:auto;display:block}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><video id="sv" src="splash.mp4" autoplay muted playsinline preload="auto"></video></div>
 <div class="wrap" id="app"></div>
 <script>
 // 外枠はGitHub Pagesに置き、中身は開いたときに天田CRMのウェブアプリから読む（2026-11-13。script.google.com のページは、
@@ -229,7 +234,23 @@ function loadGrid(){
   }).then(function(){gridLoading=false;});
 }
 document.getElementById('app').innerHTML='<div class="status"><span class="dot"></span>読み込んでいます</div>';
+// 起動アニメ：1回流し終わり、かつ中身が届いたら消す。動画が流れない（省電力モードなど）ときは中身が届きしだい消す。
+// どんなときも6秒で消す。画面を押せばすぐ消える
+var SP={data:false,video:false,gone:false};
+function splashOff(){if(SP.gone)return;SP.gone=true;var e=document.getElementById('splash');if(!e)return;e.className='out';setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e);},500);}
+function splashCheck(){if(SP.data&&SP.video)splashOff();}
+(function(){
+  var v=document.getElementById('sv'),e=document.getElementById('splash');
+  if(!v){SP.video=true;return;}
+  v.addEventListener('ended',function(){SP.video=true;splashCheck();});
+  v.addEventListener('error',function(){SP.video=true;splashCheck();});
+  var p=v.play&&v.play();if(p&&p.catch)p.catch(function(){SP.video=true;splashCheck();});
+  setTimeout(function(){if(v.paused&&v.currentTime===0){SP.video=true;splashCheck();}},900);
+  setTimeout(splashOff,6000);
+  e.addEventListener('click',splashOff);
+})();
 load(function(d,bad){
+  SP.data=true;splashCheck();
   if(!d&&!bad){document.getElementById('app').innerHTML='<div class="empty">読み込めませんでした。<br>電波のよいところで、もう一度開いてください。</div>';return;}
   DATA=d;
   if(DATA&&DATA.form)document.title='UMEコンシェルズの下調べ｜'+(DATA.form.name||DATA.id);
