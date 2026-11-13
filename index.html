@@ -42,6 +42,7 @@ ul.list li:first-child{border-top:0;padding-top:2px}
 .tag.src{color:#1d1d1f;background:#e8e8ed}
 .tag.ai{color:#0057b8;background:#e3effd}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.src{color:#f5f5f7;background:#3a3a3c}:root:not([data-theme="light"]) .tag.ai{color:#8ec5ff;background:#0b2a4a}}
+.srcl{font-size:12px;font-weight:600;white-space:nowrap;margin-left:4px;text-decoration:none}
 .siteurl{font-size:13px;color:var(--sub);word-break:break-all;margin-top:6px}
 .body{white-space:pre-wrap;font-size:15px}
 .more{color:var(--accent);background:none;border:0;padding:6px 0 0;font-size:14px;font-weight:600;cursor:pointer}
@@ -139,12 +140,14 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 // 文字の中のURLをリンクにする。「推測：」は薄く
 function rich(s){
   s=String(s==null?'':s);
-  var m=s.match(/^(推測|原文|AI)[：:]\s*/);
+  var m=s.match(/^(推測|原文|AI)[：:]\s*/),src='';
+  // AI調べの項目の最後のURLは、文の中には出さず「出典」の小さなリンクにする（2026-11-13 天田さん）
+  if(m&&m[1]==='AI'){var u=s.match(/\s+(https?:\/\/[^\s<>"']+)\s*$/);if(u){s=s.slice(0,u.index);var dm=u[1].replace(/^https?:\/\//,'').split('/')[0];src=' <a class="srcl" href="'+esc(u[1])+'" target="_blank" rel="noopener">出典：'+esc(dm)+'</a>';}}
   var h=esc(m?s.slice(m[0].length):s).replace(/https?:\/\/[^\s<>"']+/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>';});
   if(m){
     if(m[1]==='推測')h='<span class="tag">推測</span><span class="guess">'+h+'</span>';
     else if(m[1]==='原文')h='<span class="tag src">原文</span>'+h;
-    else h='<span class="tag ai">AI調べ</span>'+h;
+    else h='<span class="tag ai">AI調べ</span>'+h+src;
   }
   return h;
 }
