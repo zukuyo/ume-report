@@ -258,7 +258,7 @@ function render(){
       dr='<details class="draft"'+(r.reply&&r.reply.length?' style="margin-top:12px"':'')+'><summary>返信の下書きを見る</summary>'+
         (r.draft.subject?'<div class="dlabel">件名<button class="copy" data-copy="ds">コピー</button></div><div class="dbox" id="ds">'+esc(r.draft.subject)+'</div>':'')+
         '<div class="dlabel">本文<button class="copy" data-copy="db">コピー</button></div><div class="dbox" id="db">'+esc(r.draft.body)+'</div>'+
-        '<p class="legend">【担当】【電話】【メール】は書き換えてから送ってください</p></details>';
+        '<p class="legend">【担当】は書き換えてから送ってください。署名は各自のメールの署名が付きます</p></details>';
     }
     h+=card('最初の返信の提案',list(r.reply)+dr);
   }
