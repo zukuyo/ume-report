@@ -163,6 +163,8 @@ function card(title,inner,cls){if(!inner)return '';n++;return '<section class="c
 function fallbackCopy(t){var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(a);}
 function mapUrl(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
 
+// 本物のシートの色（白・黒は既定の見た目のまま）
+function colorStyle(bg,fc){var st=[];if(bg&&bg!=='#ffffff')st.push('background:'+bg);if(fc&&fc!=='#000000')st.push('color:'+fc);return st.join(';');}
 function grid(g){
   if(!g)return '';
   if(g.error)return '<p class="none">スケジュール帳を読めませんでした（'+esc(g.error)+'）</p>';
@@ -174,7 +176,7 @@ function grid(g){
   var nc=g.days.length*g.hours.length,cols='<colgroup><col style="width:'+lw+'px">'+(mw?'<col style="width:'+mw+'px">':'');
   for(var i=0;i<nc;i++)cols+='<col style="width:'+cw+'px">';
   cols+='</colgroup>';
-  var h='<div class="gridbox'+(nar?' nar':'')+'" id="gb"><table class="g" style="table-layout:fixed;width:'+(lw+mw+nc*cw)+'px">'+cols+'<thead><tr><th class="st" rowspan="2" style="width:'+lw+'px">リソース</th>'+(mw?'<th class="st2" rowspan="2">メモ</th>':'');
+  var h='<div class="gridbox'+(nar?' nar':'')+'" id="gb"><table class="g" style="table-layout:fixed;width:'+(lw+mw+nc*cw)+'px">'+cols+'<thead><tr><th class="st" rowspan="2" style="width:'+lw+'px;'+(g.hdr?colorStyle(g.hdr.bgA,g.hdr.fcA):'')+'">リソース</th>'+(mw?'<th class="st2" rowspan="2" style="'+(g.hdr?colorStyle(g.hdr.bgB,g.hdr.fcB):'')+'">メモ</th>':'');
   g.days.forEach(function(d,i){h+='<th class="day'+(i===1?' mid':'')+'" colspan="'+g.hours.length+'"'+(i===1?' id="mid"':'')+'>'+(i===1?'開催日　':'')+esc(d.label)+(d.found?'':'（タブなし）')+'</th>';});
   h+='</tr><tr>';
   g.days.forEach(function(){g.hours.forEach(function(x,k){h+='<th class="h'+(k===0?' dstart':'')+'">'+esc(x)+'</th>';});});
@@ -184,8 +186,8 @@ function grid(g){
   g.rows.forEach(function(r,i){if(r.group!==last){first=i;spans[i]=1;last=r.group;}else spans[first]++;});
   g.rows.forEach(function(r,i){
     h+='<tr'+(spans[i]?' class="gs"':'')+'>';
-    if(spans[i])h+='<td class="st" rowspan="'+spans[i]+'">'+esc(r.group).replace(/\n/g,'<br>')+'</td>';
-    if(mw)h+='<td class="st2">'+esc(r.label)+'</td>';
+    if(spans[i])h+='<td class="st" rowspan="'+spans[i]+'" style="'+colorStyle(r.bgA,r.fcA)+'">'+esc(r.group).replace(/\n/g,'<br>')+'</td>';
+    if(mw)h+='<td class="st2" style="'+colorStyle(r.bgB,r.fcB)+'">'+esc(r.label)+'</td>';
     // 3日分を1列に並べる（タブが無い日は空マス）
     var all=[],H=g.hours.length;
     r.days.forEach(function(cells){for(var k=0;k<H;k++)all.push(cells&&cells[k]?cells[k]:{t:'',bg:'',fc:'',w:0,m:0,c:0});});
