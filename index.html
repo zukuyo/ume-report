@@ -18,7 +18,7 @@
 html,body{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
   -webkit-font-smoothing:antialiased;line-height:1.6}
-.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px;position:relative}
 .eyebrow{font-size:12px;letter-spacing:.06em;color:var(--sub);font-weight:600}
 h1{font-size:26px;line-height:1.3;margin:4px 0 2px;font-weight:700;letter-spacing:-.01em}
 .meta{color:var(--sub);font-size:14px}
@@ -97,9 +97,11 @@ details.draft[open] summary{margin-bottom:10px}
 .badge{display:inline-block;font-size:12px;font-weight:700;color:var(--warn-ink);background:var(--warn-bg);border-radius:8px;padding:3px 8px;margin-top:8px}
 /* 起動の見せ方（2026-11-13 天田さん「ロゴはさりげなく。待たされている感じにしない」）
    小さなロゴ（見出しの上に残る）・上の細い線・中身の形をした灰色の枠（スケルトン）で、開いた直後から動いて見せる。中身が届いたら即切り替え */
-.brand{height:60px;margin:4px 0 18px;display:flex;justify-content:center}
+.brand{position:absolute;top:22px;right:16px;width:86px;height:60px}
+/* ロゴは右上（名前の横）に置く。名前が長くてもロゴに重ならないよう、見出しの右に余白（2026-11-14 天田さん） */
+#app>.eyebrow,#app>h1{padding-right:96px}
 /* 動画の黒は真っ黒でないので、明るさを寄せてから背景に溶かす（暗い画面は黒を消し、明るい画面は白黒反転して白を消す） */
-.brand video,.brand img{height:60px;width:auto;display:block;filter:brightness(.85) contrast(1.4);mix-blend-mode:screen}
+.brand video,.brand img{height:60px;width:86px;object-fit:contain;display:block;filter:brightness(.85) contrast(1.4);mix-blend-mode:screen}
 @media (prefers-color-scheme: light){.brand video,.brand img{filter:invert(1) brightness(1.15) contrast(1.4);mix-blend-mode:multiply}}
 /* 読み込み中はロゴを画面のど真ん中（縦も横も）に大きめに出し、中身が届いたら見出しの位置へすっと上がる（2026-11-13 天田さん） */
 .brand>*{position:relative;z-index:40;transform-origin:50% 50%}
@@ -329,8 +331,9 @@ document.body.className='loading';
 function centerLogo(){
   var el=document.querySelector('.brand>*'),slot=document.querySelector('.brand');
   if(!el||document.body.className!=='loading')return;
-  var r=slot.getBoundingClientRect(),dy=window.innerHeight/2-(r.top+r.height/2);
-  el.style.transform='translateY('+dy+'px) scale(1.5)';
+  // 右上の置き場所から、画面のど真ん中（縦も横も）まで寄せる。中身が届いたら transform を外して右上へ戻る
+  var r=slot.getBoundingClientRect(),dy=window.innerHeight/2-(r.top+r.height/2),dx=window.innerWidth/2-(r.left+r.width/2);
+  el.style.transform='translate('+dx+'px,'+dy+'px) scale(1.5)';
 }
 centerLogo();window.addEventListener('resize',centerLogo);
 // 中身が届いたら、ロゴを真ん中から見出しの位置へすっと上げる
