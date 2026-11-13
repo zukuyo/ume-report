@@ -187,7 +187,7 @@ function render(){
   if(v&&(v.name||v.address||v.lines&&v.lines.length)){
     var q=v.mapQuery||[v.name,v.address].filter(Boolean).join(' ');
     h+=card('会場',(v.name?'<p class="lead">'+esc(v.name)+'</p>':'')+(v.address?'<div class="meta">'+esc(v.address)+'</div>':'')+list(v.lines)+
-      (q&&v.address?'<iframe class="map" title="地図" src="https://www.google.com/maps?q='+encodeURIComponent(q)+'&output=embed&hl=ja&z=15"></iframe>':'')+
+      (q?'<iframe class="map" title="地図" src="https://www.google.com/maps?q='+encodeURIComponent(q)+'&output=embed&hl=ja&z=15"></iframe>':'')+
       (q?'<div class="actions"><a class="btn" href="'+mapUrl(q)+'" target="_blank" rel="noopener">'+IC.map+'Googleマップで開く</a></div>':''));
   }
   // 日程と空き
