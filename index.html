@@ -240,7 +240,8 @@ function render(){
   h+='<div class="actions">';
   if(f.tel)h+='<a class="btn" href="tel:'+esc(String(f.tel).replace(/[^\d+]/g,''))+'">'+IC.tel+esc(f.tel)+'</a>';
   if(f.mail)h+='<a class="btn" href="mailto:'+esc(f.mail)+'">'+IC.mail+'メール</a>';
-  if(DATA.caseUrl)h+='<a class="btn" href="'+esc(DATA.caseUrl)+'" target="_blank" rel="noopener">'+IC.web+'案件を開く</a>';
+  // 押すと、天田CRMの案件カードにこの案件を映して（?oc=鍵）、案件カードのタブを開く（2026-11-15 天田さん）
+  if(DATA.cardUrl)h+='<a class="btn" id="opencard" href="'+esc(DATA.cardUrl)+'" target="_blank" rel="noopener">'+IC.web+'案件カードを開く</a>';
   h+='</div>';
   // 対応する人（押すとグループに1行知らせる。二重の返信・返し忘れを防ぐ）
   var ow=DATA.owner;
@@ -314,6 +315,8 @@ function render(){
       if(x&&x.ok){DATA.owner=x.owner;var y=window.scrollY;render();window.scrollTo(0,y);}else{b.textContent='失敗しました';}
     }).catch(function(){b.textContent='失敗しました';});
   };});
+  var oc=document.getElementById('opencard');
+  if(oc)oc.onclick=function(){try{fetch(API+'?oc='+encodeURIComponent(TOKEN),{credentials:'omit',keepalive:true}).catch(function(){});}catch(e){}};
   var m=document.getElementById('more');
   if(m)m.onclick=function(){document.getElementById('fb').textContent=body;m.remove();};
   scrollGrid();
