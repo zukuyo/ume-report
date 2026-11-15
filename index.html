@@ -126,6 +126,12 @@ body.lift .brand>*{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 <div id="bar"></div>
 <div class="wrap"><div class="brand" aria-hidden="true"><video id="sv" src="splash.mp4" autoplay muted playsinline preload="auto"></video></div><div id="app"></div></div>
 <script>
+// 見つけた会社・会場が、この相手と同じと言えるか（2026-11-16 天田さん）：確か／たぶん／確信なし。％は使わない
+function matchBadge(m,what){m=String(m||'').trim();if(!m)return '';var why=m.replace(/^(確か|たぶん|確信なし)\s*[：:（(]?/,'').replace(/[）)]\s*$/,'').trim();
+  if(/^確信なし/.test(m))return '<div class="badge" style="margin:0 0 8px">同じ'+what+'か確信がありません'+(why?'：'+esc(why):'')+'</div>';
+  if(/^たぶん/.test(m))return '<div class="badge" style="margin:0 0 8px;opacity:.85">たぶん同じ'+what+'です'+(why?'：'+esc(why):'')+'</div>';
+  return '<div class="meta" style="margin:-2px 0 8px;color:#1f9d55">同じ'+what+'と確認できました'+(why?'（'+esc(why)+'）':'')+'</div>';}
+
 // 出典は、サイト名だけでなくページの場所まで見せる（2026-11-16 天田さん「同じサイトの別のページだと見に行かなくなる」）
 function srcLabel(u){var t=String(u||'');try{var x=new URL(t);t=x.hostname.replace(/^www\./,'')+decodeURIComponent(x.pathname).replace(/\/+$/,'');}catch(e){t=t.replace(/^https?:\/\/(www\.)?/,'').replace(/\/+$/,'');}if(t.length>46){var p=t.split('/'),last=p.pop();t=p[0]+'/…/'+(last.length>26?last.slice(0,25)+'…':last);}return t;}
 
@@ -268,15 +274,14 @@ function render(){
   var co=r.company||null;
   if(co&&(co.name||co.lines&&co.lines.length)){
     // 同じ会社だと確信がないときは、名前の下に目印を出す
-    var mt=String(co.match||''),unsure=/^確信なし/.test(mt);
-    h+=card('会社',(co.name?'<p class="lead">'+esc(co.name)+'</p>':'')+(unsure?'<div class="badge" style="margin:0 0 8px">同じ会社か確信がありません'+(mt.replace(/^確信なし[：:]?\s*/,'')?'：'+esc(mt.replace(/^確信なし[：:]?\s*/,'')):'')+'</div>':'')+list(co.lines)+
+    h+=card('会社',(co.name?'<p class="lead">'+esc(co.name)+'</p>':'')+matchBadge(co.match,'会社')+list(co.lines)+
       (co.url?'<div class="actions"><a class="btn" href="'+esc(co.url)+'" target="_blank" rel="noopener">'+IC.web+'公式サイト</a></div><div class="siteurl">'+esc(co.url)+'</div>':''));
   }
   // 会場
   var v=r.venue||null;
   if(v&&(v.name||v.address||v.lines&&v.lines.length)){
     var q=v.mapQuery||[v.name,v.address].filter(Boolean).join(' ');
-    h+=card('会場',(v.name?'<p class="lead">'+esc(v.name)+'</p>':'')+(v.address?'<div class="meta">'+esc(v.address)+'</div>':'')+list(v.lines)+
+    h+=card('会場',(v.name?'<p class="lead">'+esc(v.name)+'</p>':'')+matchBadge(v.match,'会場')+(v.address?'<div class="meta">'+esc(v.address)+'</div>':'')+list(v.lines)+
       (q?'<iframe class="map" title="地図" src="https://www.google.com/maps?q='+encodeURIComponent(q)+'&output=embed&hl=ja&z=15"></iframe>':'')+
       (q?'<div class="actions"><a class="btn" href="'+mapUrl(q)+'" target="_blank" rel="noopener">'+IC.map+'Googleマップで開く</a></div>':''));
   }
